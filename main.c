@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned int button;		  // der Button1
-unsigned int button2;			// der button2
-int button_count = 0;			// Button_press_timer
+unsigned int button;		// der Button1
+unsigned int button2;		// der button2
+int button_count = 0;		// Button_press_timer
 int button2_count = 0;		// Button_press_timer
-int move_timer = 0;				// to time the movement
-int running = 1;					// 0 == false; 1 == true;
-int rundenAnzahl = 0;			// Zähler für bestandene Runden
+int move_timer = 0;		// to time the movement
+int running = 1;		// 0 == false; 1 == true;
+int rundenAnzahl = 0;		// Zähler für bestandene Runden
 int zufallszahl = 1;
 int guterBlock = 1;		// bestimmt welcher Block passierbar ist / aendert collisionsBereiche
-int wallStep = 0;			// zählt schritte der Wand, ermoeglicht GameFreeze
+int wallStep = 0;		// zählt schritte der Wand, ermoeglicht GameFreeze
 
 int x; //globale Variable für die Schleife (komplett einfaerben)
 int v; //globale Variable für die zweite schleife (Player darstellen/faerben)
@@ -42,7 +42,7 @@ const unsigned char FarbTopf_4[7] =		//FarbArray für colorWall 4
 {
    0x29, 0xD6, 0x42, 0xCC, 0x65, 0xF2 ,0xFF
 };
-const unsigned char FarbTopf_Player[25] =		//FarbArray für Player - alle 16 Farben
+const unsigned char FarbTopf_Player[25] =	//FarbArray für Player - alle 16 Farben
 {
    0x22, 0xEC, 0x11, 0x80, 0xF0, 0xA1, 0x45, 0x53, 0xD4, 0x4C, 0x37, 0xA9 , 0x29, 0xD6, 0x42, 0xCC,
    0x51, 0xB8, 0x20, 0x3D, 0x91, 0x72, 0x65, 0xF5, 0xFF
@@ -78,10 +78,10 @@ unsigned short colorWall_4 [] =		//Initialisierung Farbwand
 void Waitms(const unsigned int msWait) {
   unsigned int   aktTime, diff;
 
-  aktTime = LPC_TMR32B0->TC; //aktuellen Zaehlerstand des Timers auslesen
+  aktTime = LPC_TMR32B0->TC; 		//aktuellen Zaehlerstand des Timers auslesen
 
   do {
-      //bereits vergangene Zeit berechnen
+					 //bereits vergangene Zeit berechnen
 			if (LPC_TMR32B0->TC >= aktTime) diff = LPC_TMR32B0->TC - aktTime;
 			else diff = (0xFFFFFFFF - aktTime) + LPC_TMR32B0->TC;
   } while (diff	< msWait);
@@ -101,15 +101,15 @@ void SendCommandSeq(const unsigned short * data, int Anzahl)
 
 	for (index=0; index<Anzahl; index++)
 	{
-		LPC_GPIO0->DATA |= 0x10;	  //Data/Command auf High => Kommando-Modus
+		LPC_GPIO0->DATA |= 0x10;		  //Data/Command auf High => Kommando-Modus
 			
-		SendeByte = (data[index] >> 8) & 0xFF; //High-Byte des Kommandos
+		SendeByte = (data[index] >> 8) & 0xFF; 	  //High-Byte des Kommandos
 		SPISend8Bit(SendeByte);
 
-		SendeByte = data[index] & 0xFF; //Low-Byte des Kommandos
+		SendeByte = data[index] & 0xFF; 	  //Low-Byte des Kommandos
 		SPISend8Bit(SendeByte);
 
-		LPC_GPIO0->DATA &= ~0x10;		//Data/Command auf Low => Daten-Modus	
+		LPC_GPIO0->DATA &= ~0x10;	          //Data/Command auf Low => Daten-Modus	
 	}
 }
 
@@ -170,10 +170,10 @@ int main() {
 	 LPC_SYSCON->SYSAHBCLKCTRL |= (1<<9);		//Enables clock for 32-bit counter/timer 0
 	 LPC_SYSCON->SYSAHBCLKCTRL |= (1<<7);		//Enables Clock for 16-bit-counter/timer0, s. [3.5.14]
   
-   LPC_GPIO0->DIR	|= 0x10;		//PIO0_4 als Data/Command, digitaler Ausgang
-	 LPC_GPIO1->DIR |= 0x80;		//PIO1_7 als Reset, digitaler Ausgang
-	 LPC_GPIO2->DIR |= 0x400;	  //PIO2_10 als SSEL, digitaler Ausgang
-	 LPC_GPIO3->DIR |= 0x3F;    // PIO3_0 bis PIO3_5 sind Ausgänge
+   LPC_GPIO0->DIR	|= 0x10;	//PIO0_4 als Data/Command, digitaler Ausgang
+	 LPC_GPIO1->DIR |= 0x80;	//PIO1_7 als Reset, digitaler Ausgang
+	 LPC_GPIO2->DIR |= 0x400;       //PIO2_10 als SSEL, digitaler Ausgang
+	 LPC_GPIO3->DIR |= 0x3F;        // PIO3_0 bis PIO3_5 sind Ausgänge
 	
 	 	
    //Timer32B0 initialisieren. Er liefert die Zeitbasis fuer die Funktion waitms
@@ -181,17 +181,17 @@ int main() {
    LPC_TMR32B0->TCR = 0x02;  	//setzt Timer zurueck und haelt ihn an
    LPC_TMR32B0->TCR = 0x01;  	//startet Timer
 	 LPC_GPIO2->IS |= 0x00;
-	 LPC_GPIO2->IE |= 0x200;		// Random_IR
+	 LPC_GPIO2->IE |= 0x200;	// Random_IR
 	 LPC_GPIO2->IEV |= 0x00;
 	 NVIC->ISER[0] |=0x20000000;
 
 	 //Timer16BO initialisieren. Er liefert die Zeitbasis zum entprellen unserer Buttons.
-	 LPC_TMR16B0->PR = 48000;					  	//Prescaler setzten für Milisekunden
-	 LPC_TMR16B0->TCR = 0x02;					  	//Timer 16B0 reset und anhalten
-	 LPC_TMR16B0->MR0 = 1;							  //Match-Register0 = Jede Milisekunde
-	 LPC_TMR16B0->MCR = 0x03;					  	//Match-Controll-Register IR und Reset durch MR0
-	 LPC_TMR16B0->TCR = 0x1;							//Timer16B0 starten
-	 NVIC->ISER[0] |= 0x10000;						//Interrupt Set Enable für Exception 16, Timer16_0, erlaubt Interrupts
+	 LPC_TMR16B0->PR = 48000;	  	//Prescaler setzten für Milisekunden
+	 LPC_TMR16B0->TCR = 0x02;	 	//Timer 16B0 reset und anhalten
+	 LPC_TMR16B0->MR0 = 1;		        //Match-Register0 = Jede Milisekunde
+	 LPC_TMR16B0->MCR = 0x03;	  	//Match-Controll-Register IR und Reset durch MR0
+	 LPC_TMR16B0->TCR = 0x1;		//Timer16B0 starten
+	 NVIC->ISER[0] |= 0x10000;		//Interrupt Set Enable für Exception 16, Timer16_0, erlaubt Interrupts
 	
 	 //SPI-Schnittstelle initialisieren:
    SPIInit8BitMaster();
@@ -225,7 +225,7 @@ int main() {
 	 while (1) {;} 	//Endlosschleife
 }
 
-// Random Number Generator (RNG)
+		// Random Number Generator (RNG)
 		void PIOINT2_IRQHandler(void){
 			unsigned int i;
 			NVIC->ICPR[0] |=0x20000000;
@@ -248,19 +248,19 @@ int main() {
 		}
 
 
-		void TIMER16_0_IRQHandler(void){			  //Exception_Handler 
+		void TIMER16_0_IRQHandler(void){		        //Exception_Handler 
 
 			 // button1
-			button = LPC_GPIO2->DATA;					    // GPIO2DATA aufnehmen	
-			button = (button & 0x200)>>9;					// Button maskieren  PIO2_9
+			button = LPC_GPIO2->DATA;		        // GPIO2DATA aufnehmen	
+			button = (button & 0x200)>>9;			// Button maskieren  PIO2_9
 			//  button2
 			button2 = LPC_GPIO1->DATA;
-			button2 = (button2 & 0x10)>>4;				//button2 maskieren PIO1_4
+			button2 = (button2 & 0x10)>>4;			//button2 maskieren PIO1_4
 			
 	
 
 			// Button 2 links ausweichen (button welcher weiter weg vom Stromanschluss des Boardes ist.)
-			if (running > 0){					// Moeglichkeit Buttons auszuschalten , wenn running = 0 gesetzt wird. nach Crash zb.
+			if (running > 0){	// Moeglichkeit Buttons auszuschalten , wenn running = 0 gesetzt wird. nach Crash zb.
 			if (!button2) {
 					button2_count++;
 					}
@@ -298,13 +298,13 @@ int main() {
 			else 	{
 			button_count =0;
 			}
-			if (button_count == 6){							// identisch mit button2 :)
+			if (button_count == 6){					// identisch mit button2 :)
 			SendCommandSeq(&player[0],6);
 			for(v = 0; v<400; v++)
 					{
 						SPISend8Bit(0xFF);
 					 }
-				if (player[2]<0x1270){						// halt arraywerte erhoehen, statt verringern
+				if (player[2]<0x1270){				// halt arraywerte erhoehen, statt verringern
 				player[2]++;       
 				player[3]++; 
 				}
@@ -320,11 +320,11 @@ int main() {
 	
 		// Bewegung der color_Wände
 		move_timer++;															// move Timer zählt durchgehend hoch
-		if (move_timer == 10){ 										// Sobald Timer > 50
+		if (move_timer == 10){ 					/ Sobald Timer > 50
 			
 					// WALL 1
 					SendCommandSeq(&colorWall_1[0],6);  // colorWall_1 alte position loeschen
-					for(v = 0; v<800; v++)							// alle Pixel durchgehen...
+					for(v = 0; v<800; v++)		    // alle Pixel durchgehen...
 					{
 						SPISend8Bit(0xFF);								// mit Hintergrundfarbe füllen ( löschen)
 					 }
@@ -338,7 +338,7 @@ int main() {
 					
 					// WALL 2
 					SendCommandSeq(&colorWall_2[0],6);  // colorWall_1 alte position loeschen
-					for(v = 0; v<825; v++)							// alle Pixel durchgehen...
+					for(v = 0; v<825; v++)		    // alle Pixel durchgehen...
 					{
 						SPISend8Bit(0xFF);								// mit Hintergrundfarbe füllen ( löschen)
 					 }
@@ -352,7 +352,7 @@ int main() {
 
 					// WALL 3
 					SendCommandSeq(&colorWall_3[0],6);  // colorWall_3 alte position loeschen
-					for(v = 0; v<825; v++)							// alle Pixel durchgehen...
+					for(v = 0; v<825; v++)		    // alle Pixel durchgehen...
 					{
 						SPISend8Bit(0xFF);								// mit Hintergrundfarbe füllen ( löschen)
 					 }
@@ -366,7 +366,7 @@ int main() {
 
 					// WALL 4
 					SendCommandSeq(&colorWall_4[0],6);  // colorWall_4 alte position loeschen
-					for(v = 0; v<850; v++)							// alle Pixel durchgehen...
+					for(v = 0; v<850; v++)		    // alle Pixel durchgehen...
 					{
 						SPISend8Bit(0xFF);								// mit Hintergrundfarbe füllen ( löschen)
 					 }
@@ -556,10 +556,10 @@ int main() {
 							
 							Waitms(50);
 							wallStep = 0;           // reset wallStepCounter :)
-							running=1;				      // auftauen
+							running=1;	        // auftauen
 					}
 				
-	LPC_TMR16B0->IR = 0x1;							//IR quittieren für MR0, beenden des interrupts
+	LPC_TMR16B0->IR = 0x1;		//IR quittieren für MR0, beenden des interrupts
 		return;	
 	}  
 }
